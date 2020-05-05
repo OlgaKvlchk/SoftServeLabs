@@ -86,37 +86,16 @@ Manager.prototype.addUserBalance = function(phone, balance) {
     }
 }
 
-// Manager.prototype.withdrawPayOfTariff = function(phone) { //withdrow
-//     var user = this.getUserByPhone(phone);
-//     if (user) {
-//         var userTariff = this.getUserTariff(phone);
-
-//         if (userTariff && user.getPayStatus() === false) {
-//             user.removeBalance(userTariff.getPrice());
-//             user.setPayStatus(true);
-//         }
-//     }
-// }
-
-Manager.prototype.withdrawPayOfTariff = function(phone, callback) {
+Manager.prototype.withdrawPayOfTariff = function(phone) { //withdraw
     var user = this.getUserByPhone(phone);
     if (user) {
         var userTariff = this.getUserTariff(phone);
 
         if (userTariff && user.getPayStatus() === false) {
-            setTimeout(function() {
-                user.removeBalance(userTariff.getPrice(), setTimeout(function() {
-                    user.setPayStatus(true);
-                    callback(phone);
-                }.bind(this), 1000));
-            }.bind(this), 2000);
+            user.removeBalance(userTariff.getPrice());
+            user.setPayStatus(true);
         }
     }
-}
-
-Manager.prototype.notifyAboutWithdraw = function(user) {
-    console.log(`The payment for the tariff of ${user} was withdraw`);
-    return `The payment for the tariff of ${user} was withdraw`;
 }
 
 Manager.prototype.getMessageById = function(id) {
@@ -167,11 +146,6 @@ Manager.prototype.deleteMessageById = function(id) {
     }
 }
 
-Manager.prototype.callback = function(secondCallback) {
-    console.log('some Message!');
-
-}
-
 // Manager.prototype.sendMessage = function(message) { //param callback
 //     var creator = this.getUserByPhone(message.getCreator());
 //     if (creator) {
@@ -186,36 +160,31 @@ Manager.prototype.callback = function(secondCallback) {
 //         }
 //     }
 // }
-
-Manager.prototype.sendMessage = function(message, callback) { //param callback
+debugger
+Manager.prototype.sendMessageAsync = function(message, callback) { //param callback
     setTimeout(function() {
-        var phoneCreator = message.getCreator();
-        var creator = this.getUserByPhone(phoneCreator);
+        var error = null;
+        var creatorPhone = message.getCreator();
+        var creator = this.getUserByPhone(creatorPhone);
         if (creator) {
-            var phoneReciever = message.getReciever();
-            var reciever = this.getUserByPhone(phoneReciever);
+            var recieverPhone = message.getReciever();
+            var reciever = this.getUserByPhone(recieverPhone);
             if (reciever && creator.getPayStatus()) {
                 this._setMessageType(message);
 
-                var messagesTypesArr = this.getUserTariff(phoneCreator).getMessageTypes();
+                var messagesTypesArr = this.getUserTariff(creatorPhone).getMessageTypes();
                 if (messagesTypesArr.includes(message.getType())) {
                     this.addMessage(message);
-                    if (callback) { callback(); }
                 }
-            }
+            } // add err
+        } else {
+            error = 'Creator not found';
+
         }
-    }.bind(this), 1000);
+        if (callback) {
+            callback(error, this.getRecieverMessages(recieverPhone));
+        }
+    }.bind(this), 2000);
 }
 
-debugger
-Manager.prototype.sendMessagesAsync = function(message1, message2, message3) {
-    //console.log(message1);
-    manager.sendMessage(message1, function() {
-        // console.log(message2);
-        manager.sendMessage(message2, function() {
-            //console.log(message3);
-            manager.sendMessage(message3);
-        }.bind(this));
-        //console.log(`The message ${message} was send sucsessfull`) ;
-    }.bind(this));
-}.bind(this);
+//debugger
