@@ -146,45 +146,32 @@ Manager.prototype.deleteMessageById = function(id) {
     }
 }
 
-// Manager.prototype.sendMessage = function(message) { //param callback
-//     var creator = this.getUserByPhone(message.getCreator());
-//     if (creator) {
-//         var reciever = this.getUserByPhone(message.getReciever());
-//         if (reciever && creator.getPayStatus()) {
-//             this._setMessageType(message);
-
-//             var messagesTypesArr = this.getUserTariff(message.getCreator()).getMessageTypes();
-//             if (messagesTypesArr.includes(message.getType())) {
-//                 this.addMessage(message);
-//             }
-//         }
-//     }
-// }
-debugger
-Manager.prototype.sendMessageAsync = function(message, callback) { //param callback
+//debugger
+Manager.prototype.sendMessage = function(message, callback) { //param callback
     setTimeout(function() {
         var error = null;
         var creatorPhone = message.getCreator();
         var creator = this.getUserByPhone(creatorPhone);
-        if (creator) {
-            var recieverPhone = message.getReciever();
-            var reciever = this.getUserByPhone(recieverPhone);
-            if (reciever && creator.getPayStatus()) {
+        var recieverPhone = message.getReciever();
+        var reciever = this.getUserByPhone(recieverPhone);
+        if (creator && reciever) {
+            if (creator.getPayStatus()) {
                 this._setMessageType(message);
 
                 var messagesTypesArr = this.getUserTariff(creatorPhone).getMessageTypes();
                 if (messagesTypesArr.includes(message.getType())) {
                     this.addMessage(message);
+                } else {
+                    error = 'This type of message not available in the current tariff'
                 }
-            } // add err
+            } else {
+                error = 'The tariff was not paid';
+            }
         } else {
-            error = 'Creator not found';
-
+            error = 'Creator or reciever not found';
         }
         if (callback) {
             callback(error, this.getRecieverMessages(recieverPhone));
         }
     }.bind(this), 2000);
 }
-
-//debugger
