@@ -19,7 +19,7 @@ manager.addUser(user2);
 manager.setUserTariff('097654', 'Simple Tariff');
 manager.setUserTariff('089', 'All inclusive');
 manager.withdrawPayOfTariff('097654', manager.notifyAboutWithdraw);
-manager.withdrawPayOfTariff('089', manager.notifyAboutWithdraw);
+//manager.withdrawPayOfTariff('089', manager.notifyAboutWithdraw);
 //manager.sendMessagesAsync(mess1, mess2, mess3);
 //manager.addUser(user2);
 //manager.addMessage(mess1);
