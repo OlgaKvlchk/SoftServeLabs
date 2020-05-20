@@ -1,0 +1,16 @@
+{
+    "name": "operatorsystemts",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.ts",
+    "dependencies": {
+        "@types/lodash": "^4.14.151",
+        "lodash-ts": "^1.2.7"
+    },
+    "devDependencies": {},
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "",
+    "license": "ISC"
+}
