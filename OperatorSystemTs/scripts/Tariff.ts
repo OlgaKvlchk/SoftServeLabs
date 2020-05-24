@@ -1,9 +1,9 @@
 class Tariff implements ITarifable {
     private _id: number;
     private _name: string;
-    private _messageTypes: string[];
+    private _messageTypes: MessageType[]; //enum 
     private _price: number;
-    constructor(name: string, messageTypes: string[], price: number) {
+    public constructor(name: string, messageTypes: MessageType[], price: number) {
         this._id = Tariff.generateId()
         this._name = name;
         this._messageTypes = messageTypes;
@@ -29,14 +29,14 @@ class Tariff implements ITarifable {
         this._name = name;
     }
 
-    public get messageTypes(): string[] {
+    public get messageTypes(): MessageType[] {
         return this._messageTypes;
     }
 
-    public addMessageTypes(messageTypes: string[]): void {
-        const concatArr: string[] = [];
+    public addMessageTypes(messageTypes: MessageType[]): void {
+        const concatArr: MessageType[] = [];
         for (let i = 0; i < messageTypes.length; i++) {
-            this._messageTypes.forEach((item: string) => {
+            this._messageTypes.forEach((item: MessageType) => {
                 if (messageTypes[i] !== item) {
                     concatArr.push(messageTypes[i]);
                 }
@@ -45,7 +45,7 @@ class Tariff implements ITarifable {
         this._messageTypes = this._messageTypes.concat(concatArr);
     }
 
-    public deleteMessageTypes(messageTypes: string[]): void {
+    public deleteMessageTypes(messageTypes: MessageType[]): void {
         _.pullAll(this._messageTypes, messageTypes);
     }
 

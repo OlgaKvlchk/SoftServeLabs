@@ -120,21 +120,21 @@ class Manager  {
         return this._messageList.toArray().filter(item => item.creator === phone);
     }
 
-    private static setMessageType(message: IMessagable): void {
+    private setMessageType(message: IMessagable): void {
         const messageBody = message.body;
         const length = messageBody.length;
         switch (true) {
             case length <= 10:
-                message.type = 'short';
+                message.type = MessageType.short;
                 break;
             case length > 10 && length <= 30:
-                message.type = 'middle';
+                message.type = MessageType.middle;
                 break;
             case length > 30 && length <= 60:
-                message.type = 'large';
+                message.type = MessageType.large;
                 break;
             default:
-                message.type = 'extra large';
+                message.type = MessageType.extraLarge;
         }
     }
 
@@ -150,7 +150,7 @@ class Manager  {
     }
 
    private isAvialableMessageType(message: IMessagable): boolean{
-            Manager.setMessageType(message);
+            this.setMessageType(message);
             const tariff = this.getUserTariff(message.creator);
             if(tariff && message.type){
                 if (tariff.messageTypes.includes(message.type)){

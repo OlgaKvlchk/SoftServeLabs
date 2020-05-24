@@ -14,7 +14,9 @@ class List {
     }
     remove(item) {
         const index = this.list.indexOf(item);
-        this.removeByIndex(index);
+        if (index != -1) {
+            this.removeByIndex(index);
+        }
     }
     getByIndex(index) {
         if (index >= 0) {
@@ -28,11 +30,11 @@ class List {
         if (index >= 0) {
             this.list.splice(index, 1);
         }
-        // add if negative index
+        // add if non exist
     }
     getById(id) {
-        const rezult = this.list.find((item) => item.id === id);
-        return rezult || null;
+        const result = this.list.find((item) => item.id === id);
+        return result || null;
     }
     ;
     removeById(id) {
@@ -108,6 +110,9 @@ class Manager {
         if (user) {
             return user.tariff;
         }
+        else {
+            return null;
+        }
     }
     setUserTariff(phone, name) {
         const user = this.getUserByPhone(phone);
@@ -149,32 +154,71 @@ class Manager {
     getCreatorMessages(phone) {
         return this._messageList.toArray().filter(item => item.creator === phone);
     }
-    _setMessageType(message) {
+    setMessageType(message) {
         const messageBody = message.body;
         const length = messageBody.length;
         switch (true) {
             case length <= 10:
-                message.type = 'short';
+                message.type = MessageType.short;
                 break;
             case length > 10 && length <= 30:
-                message.type = 'middle';
+                message.type = MessageType.middle;
                 break;
             case length > 30 && length <= 60:
-                message.type = 'large';
+                message.type = MessageType.large;
                 break;
             default:
-                message.type = 'extra large';
+                message.type = MessageType.extraLarge;
         }
     }
     addMessage(message) {
         this._messageList.add(message);
     }
-    //pull => splice
     deleteMessageById(id) {
         const message = this.getMessageById(id);
         if (message) {
             this._messageList.remove(message);
         }
+    }
+    isAvialableMessageType(message) {
+        this.setMessageType(message);
+        const tariff = this.getUserTariff(message.creator);
+        if (tariff && message.type) {
+            if (tariff.messageTypes.includes(message.type)) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        else {
+            return false;
+        }
+    }
+    sendMessage(message) {
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                const creator = this.getUserByPhone(message.creator);
+                const reciever = this.getUserByPhone(message.reciever);
+                if (creator && reciever) {
+                    if (creator.payStatus) {
+                        if (this.isAvialableMessageType(message)) {
+                            this.addMessage(message);
+                        }
+                        else {
+                            reject(`This type of message in message ${message.id} not available in the current tariff`);
+                        }
+                    }
+                    else {
+                        reject(`The tariff was not paid. You cannot send the message ${message.id}`);
+                    }
+                }
+                else {
+                    reject(`Creator or reciever not found in message ${message.id}`);
+                }
+                resolve(this.getRecieverMessages(message.reciever));
+            }, 2000);
+        });
     }
 }
 let Message = /** @class */ (() => {
@@ -213,6 +257,13 @@ let Message = /** @class */ (() => {
     })();
     return Message;
 })();
+var MessageType;
+(function (MessageType) {
+    MessageType[MessageType["short"] = 0] = "short";
+    MessageType[MessageType["middle"] = 1] = "middle";
+    MessageType[MessageType["large"] = 2] = "large";
+    MessageType[MessageType["extraLarge"] = 3] = "extraLarge";
+})(MessageType || (MessageType = {}));
 let Tariff = /** @class */ (() => {
     class Tariff {
         constructor(name, messageTypes, price) {
@@ -277,6 +328,9 @@ let User = /** @class */ (() => {
         get phone() {
             return this._phone;
         }
+        set phone(phone) {
+            this._phone = phone;
+        }
         get balance() {
             return this._balance;
         }
@@ -316,24 +370,29 @@ let User = /** @class */ (() => {
     })();
     return User;
 })();
+let tariff1 = new Tariff('Simple Tariff', [MessageType.short], 30);
+let tariff2 = new Tariff('All inclusive', [MessageType.middle, MessageType.short, MessageType.large, MessageType.extraLarge], 100);
 let user1 = new User("098", 654);
 let user2 = new User('089', 8945);
 let user3 = new User('097654', 945);
-let tariff1 = new Tariff('Simple Tariff', ['short'], 30);
-let tariff2 = new Tariff('All inclusive', ['short', 'middle', 'large', 'extra large'], 100);
 let mess1 = new Message('089', '097654', 'mess1');
 let mess2 = new Message('097654', '089', 'mesjhkhs1');
-let mess3 = new Message('09765', '089', 'meshbmbhs1');
-console.log(mess1, mess2, mess3);
-console.log(tariff1, tariff2);
-console.log(user1, user2, user3);
-// let manager = new Manager();
-// var mess1 = new Message('089', '097654', 'mess1');
-// var mess2 = new Message('097654', '089', 'mesjhkhs1');
-// var mess3 = new Message('09765', '089', 'meshbmbhs1');
-// var mess4 = new Message('097654', '089', 'bodykjfffffffffffffffffsfdsfsfsfdffggddddddddgfdddddddddddgfdfgfkjkjkjmess2');
-// manager.addTariff(tariff1);
-// manager.addTariff(tariff2);
+let mess3 = new Message('098', '089', 'meshbmbhs1');
+let mess4 = new Message('097654', '089', 'bodykjfffffffffffffffffsfdsfsfsfdffggddddddddgfdddddddddddgfdfgfkjkjkjmess2');
+let tariffList = new List();
+let userList = new List();
+let messageList = new List();
+let manager = new Manager(tariffList, userList, messageList);
+console.log(user1, user2, user3, tariff1, tariff2, mess1, mess2, mess3, mess4);
+manager.addTariff(tariff1);
+manager.addTariff(tariff2);
+manager.addUser(user1);
+manager.addUser(user2);
+manager.addUser(user3);
+manager.withdrawPayOfTariff('097654');
+manager.withdrawPayOfTariff('089');
+console.log(manager);
+console.log(manager.getTariffByName("All inclusive"));
 // manager.getTariffByName("All inclusive");
 // //manager.deleteTariffByName('All inclusive');
 // manager.getTariffByName('Simple Tariff');
@@ -359,27 +418,27 @@ console.log(user1, user2, user3);
 // // manager.getRecieverMessages('097654');
 // // manager.getCreatorMessages('089');
 // //manager.deleteMessageById(1);
-// // manager.sendMessage(mess2)
+// //manager.sendMessage(mess2)
 // // manager.sendMessage(mess3)
 // // manager.sendMessage(mess1)
 // // manager.sendMessage(mess4)
 // // manager.sendMessage(mess3)
-// // manager.sendMessage(mess1)
-// //     .then(data => {
-// //         console.log('Received messages:', data);
-// //         return manager.sendMessage(mess2);
-// //     })
-// //     .then(data => {
-// //         console.log('Received messages:', data);
-// //         return manager.sendMessage(mess3);
-// //     })
-// //     .then(data => console.log('Received messages:', data))
-// //     .catch(err => console.log(err))
-// //     .finally(() => console.log('The Promise is finished'))
-// // async function sendMess(mess) {
-// //     const data = await manager.sendMessage(mess);
-// //     console.log(data);
-// // }
+manager.sendMessage(mess1)
+    .then(data => {
+    console.log('Received messages:', data);
+    return manager.sendMessage(mess2);
+})
+    .then(data => {
+    console.log('Received messages:', data);
+    return manager.sendMessage(mess3);
+})
+    .then(data => console.log('Received messages:', data))
+    .catch(err => console.log(err));
+//.finally(() => console.log('The Promise is finished'))
+// async function sendMess(mess) {
+//     const data = await manager.sendMessage(mess);
+//     console.log(data);
+// }
 // // (async() => {
 // //     try {
 // //         await sendMess(mess1);

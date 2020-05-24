@@ -3,5 +3,5 @@ interface IMessagable{
     readonly creator: string;
     readonly reciever: string;
     readonly body: string;
-    type: string | null;
+    type: MessageType | null;
 }

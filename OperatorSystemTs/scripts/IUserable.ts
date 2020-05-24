@@ -1,6 +1,6 @@
 interface IUserable{
     readonly id: number;
-    readonly phone: string;
+    phone: string;
     readonly balance: number;
     addBalance(balance: number): void;
     removeBalance(balance: number ): void;

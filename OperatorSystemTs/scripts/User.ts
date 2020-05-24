@@ -27,6 +27,10 @@ class User implements IUserable{
         return this._phone;
     }
 
+    public set phone(phone: string){
+        this._phone = phone;
+    }
+
     public get balance(): number {
         return this._balance;
     }

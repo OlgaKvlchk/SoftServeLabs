@@ -3,8 +3,8 @@ class Message implements IMessagable {
     private _creator: string;
     private _reciever: string;
     private _body: string;
-    private _type: string | null;
-    constructor(creator: string, reciever: string, body: string) {
+    private _type: MessageType | null;
+    public constructor(creator: string, reciever: string, body: string) {
         this._id = Message.generateId();
         this._creator = creator;
         this._reciever = reciever;
@@ -35,7 +35,7 @@ class Message implements IMessagable {
         return this._body;
     }
 
-    public get type(): string | null {
+    public get type(): MessageType | null {
         return this._type;
     }
 
