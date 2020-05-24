@@ -18,10 +18,9 @@ class Manager  {
         return this._tariffList.getById(id);
     }
 
-    public getTariffByName(name: string): ITarifable | undefined {
-        return this._tariffList.toArray().find((item) => {
-            return item.name === name;
-        });
+    public getTariffByName(name: string): ITarifable | null {
+        const tariff = this._tariffList.toArray().find(item => item.name === name)
+        return tariff || null;
     }
 
     public addTariff(tariff: ITarifable): void {
@@ -44,8 +43,11 @@ class Manager  {
         return this._userList.getById(id);
     }
 
-    public getUserByPhone(phone: string): IUserable | undefined {
-        return this._userList.toArray().find(item => item.phone === phone);
+    public getUserByPhone(phone: string): IUserable | null {
+        const user = this._userList.toArray().find(item => item.phone === phone);
+        if (user){
+            return user;
+        } else {return null};
     }
 
     public addUser(user: IUserable): void {
@@ -83,10 +85,12 @@ class Manager  {
         }
     }
 
-    public getUserBalance(phone: string): number | undefined {
+    public getUserBalance(phone: string): number | null {
         const user = this.getUserByPhone(phone);
-        if (user) {
+        if (user){
             return user.balance;
+        } else {
+            return null;
         }
     }
 
@@ -109,7 +113,7 @@ class Manager  {
     }
 
     public getMessageById(id: number): IMessagable | null {
-        return this._messageList.getById(id);
+        return this._messageList.getById(id) || null;
     }
 
     public getRecieverMessages(phone: string): IMessagable[] {
@@ -120,7 +124,7 @@ class Manager  {
         return this._messageList.toArray().filter(item => item.creator === phone);
     }
 
-    private setMessageType(message: IMessagable): void {
+    private static setMessageType(message: IMessagable): void {
         const messageBody = message.body;
         const length = messageBody.length;
         switch (true) {
@@ -150,17 +154,10 @@ class Manager  {
     }
 
    private isAvialableMessageType(message: IMessagable): boolean{
-            this.setMessageType(message);
+            Manager.setMessageType(message);
             const tariff = this.getUserTariff(message.creator);
-            if(tariff && message.type){
-                if (tariff.messageTypes.includes(message.type)){
-                    return true;
-                } else {
-                    return false;
-                }
-            } else {
-                return false;
-            }
+            if(tariff === null || message.type === null){return false;}
+               return tariff.messageTypes.includes(message.type);
     }
 
    public sendMessage(message: IMessagable): Promise<IMessagable[]> { //param callback
